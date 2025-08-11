@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -14,9 +15,9 @@ const filePath = "./gopher.json"
 var err error
 
 type arcModel struct {
-	Title   string   `json:"title"`
-	Story   []string `json:"story"`
-	Options []optionsModel
+	Title   string         `json:"title"`
+	Story   []string       `json:"story"`
+	Options []optionsModel `json:"options"`
 }
 
 type optionsModel struct {
@@ -25,17 +26,32 @@ type optionsModel struct {
 }
 
 type handlerStruct struct {
-	Data     map[string]arcModel
-	Template *template.Template
+	Story        map[string]arcModel
+	Template     *template.Template
+	Introduction string
+}
+
+func newHandler(story map[string]arcModel, intro string, opts ...func(*handlerStruct)) *handlerStruct {
+	handler := &handlerStruct{Story: story, Introduction: intro}
+	for _, opt := range opts {
+		opt(handler)
+	}
+	return handler
+}
+
+func withTemplate(templ *template.Template) func(*handlerStruct) {
+	return func(h *handlerStruct) {
+		h.Template = templ
+	}
 }
 
 func (h *handlerStruct) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	arcValue := r.URL.Path
 	arcValue, _ = strings.CutPrefix(arcValue, "/")
 	if arcValue == "" {
-		arcValue = "intro"
+		arcValue = h.Introduction
 	}
-	if err = h.Template.ExecuteTemplate(w, "Index", h.Data[arcValue]); err != nil {
+	if err = h.Template.Execute(w, h.Story[arcValue]); err != nil {
 		err = fmt.Errorf("erro ao executar o template: %w", err)
 	}
 }
@@ -53,12 +69,13 @@ func extractData() map[string]arcModel {
 }
 
 func main() {
-	templ := template.Must(template.ParseGlob("templates/*.html"))
-	pageHandle := handlerStruct{
-		Data:     extractData(),
-		Template: templ,
-	}
-	http.Handle("/", &pageHandle)
-	fmt.Println("Servidor Iniciado")
-	http.ListenAndServe(":8080", nil)
+	port := flag.String("port", "8080", "Port of web application")
+	intro := flag.String("intro", "intro", "Introduction arc")
+	flag.Parse()
+
+	templ := template.Must(template.ParseGlob("templates/index.html"))
+	pageHandle := newHandler(extractData(), *intro, withTemplate(templ))
+
+	fmt.Println("Servidor Iniciado na porta", *port)
+	http.ListenAndServe(":"+*port, pageHandle)
 }

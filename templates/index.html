@@ -1,19 +1,51 @@
-{{define "Index"}}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    .page {
+        font-size: 16px;
+        background-color: #e6e6e6;
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        margin: 5rem;
+        padding: 3rem 5rem;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 10px 15px 5px #a6a6a6;
+    }
+    .title h1 {
+        color: #007e8f;
+    }
+    .options {
+        text-align: left;
+    }
+    .options a{
+        color: #007e8f;
+        text-decoration: none;
+    }
+    </style>
     <title>Choose Your Own Adventure</title>
 </head>
 <body>
-    <h1>{{.Title}}</h1>
-    {{range .Story}}
-    <p>{{.}}</p>
-    {{end}}
-    {{range .Options}}
-    <a href="{{.Arc}}">{{.Text}}</a>
-    {{end}}
+    <div class="page">
+        <div class="data">
+            <div class="title">
+                <h1>{{.Title}}</h1>
+            </div>
+            <div class="story">
+                {{range .Story}}
+                <p>{{.}}</p>
+                {{end}}
+            </div>
+            <div class="options">
+                <ul>
+                {{range .Options}}
+                <li><a href="/{{.Arc}}">{{.Text}}</a></li>
+                {{end}}
+                </ul>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
-{{end}}
