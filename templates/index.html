@@ -1,0 +1,19 @@
+{{define "Index"}}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Own Adventure</title>
+</head>
+<body>
+    <h1>{{.Title}}</h1>
+    {{range .Story}}
+    <p>{{.}}</p>
+    {{end}}
+    {{range .Options}}
+    <a href="{{.Arc}}">{{.Text}}</a>
+    {{end}}
+</body>
+</html>
+{{end}}
